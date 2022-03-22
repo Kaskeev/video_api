@@ -15,6 +15,7 @@ const API = "http://localhost:8000/videos";
 //! начальное состояние, чтоб позже могли сохранить данные
 const INIT_STATE = {
   videos: [],
+  oneVideo: null,
 };
 
 //! функция, которая меняет State
@@ -22,6 +23,8 @@ const reducer = (state = INIT_STATE, action) => {
   switch (action.type) {
     case "GET_VIDEOS":
       return { ...state, videos: action.payload.data };
+    case "GET_ONE_VIDEO":
+      return { ...state, oneVideo: action.payload.data };
     default:
       return state;
   }
@@ -44,9 +47,34 @@ const VideosContextProvider = ({ children }) => {
     getAllVideos();
   }
 
+  async function addVideo(newProduct) {
+    await axios.post(API, newProduct);
+    getAllVideos();
+  }
+  async function getOneVideo(id) {
+    let result = await axios.get(`${API}/${id}`);
+    // console.log(result);
+    dispatch({
+      type: "GET_ONE_VIDEO",
+      payload: result,
+    });
+  }
+  async function updateVideo(id, editedVideo) {
+    await axios.patch(`${API}/${id}`, editedVideo);
+    getAllVideos();
+  }
+
   return (
     <videosContext.Provider
-      value={{ videos: state.videos, getAllVideos, deleteVideo }}
+      value={{
+        videos: state.videos,
+        oneVideo: state.oneVideo,
+        getAllVideos,
+        deleteVideo,
+        addVideo,
+        getOneVideo,
+        updateVideo,
+      }}
     >
       {children}
     </videosContext.Provider>
